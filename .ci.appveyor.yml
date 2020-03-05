@@ -41,8 +41,9 @@ workflows:
     jobs:
       - build: https://ci.appveyor.com/api/projects/status/t39vw02absjk205o?svg=true
       - build2: [![Build status](https://ci.appveyor.com/api/projects/status/rvn8m2qtymt7ygy2
-
-executors:
+      - build: [![Build status](https://ci.appveyor.com/api/projects/status/t39vw02absjk205o/branch/master?svg=true
+      - build: https://ci.appveyor.com/api/projects/status/t39vw02absjk205o/branch/master?svg=true
+executes:
   my-executor:
     docker:
       - image: buildpack-deps:jessie
