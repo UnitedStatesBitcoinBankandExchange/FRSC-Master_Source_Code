@@ -39,10 +39,18 @@ workflows:
   version: 2
   build_and_test:
     jobs:
-      - build: https://ci.appveyor.com/api/projects/status/t39vw02absjk205o?svg=true
-      - build2: [![Build status](https://ci.appveyor.com/api/projects/status/rvn8m2qtymt7ygy2
-      - build: [![Build status](https://ci.appveyor.com/api/projects/status/t39vw02absjk205o/branch/master?svg=true
-      - build: https://ci.appveyor.com/api/projects/status/t39vw02absjk205o/branch/master?svg=true
+      - build:  bhttps://ci.appveyor.com/api/projects/status/ptq24yc205757yyv?svg=true
+Raster image URL
+- build: https://ci.appveyor.com/api/projects/status/ptq24yc205757yyv
+Sample markdown code
+- build: [![Build status](https://ci.appveyor.com/api/projects/status/ptq24yc205757yyv?svg=true)](https://ci.appveyor.com/project/zachwylde00/usbtc-master-fromfrsctemplate)
+master branch status badge
+SVG branch image URL
+- build: https://ci.appveyor.com/api/projects/status/ptq24yc205757yyv/branch/master?svg=true
+Raster branch image URL
+- build: https://ci.appveyor.com/api/projects/status/ptq24yc205757yyv/branch/master
+Branch sample markdown code
+- build: [![Build status](https://ci.appveyor.com/api/projects/status/ptq24yc205757yyv/branch
 executes:
   my-executor:
     docker:
