@@ -14,7 +14,7 @@ on:
 description: Install the latest Docker Community Edition from Amazon Linux Extras, and enable the ec2-user user to manage docker without using sudo.
 schemaVersion: 1.0.1
 
-phases:
+jobs:
   - name: build
     steps:
       - name: InstallDockerCE
