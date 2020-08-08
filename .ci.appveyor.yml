@@ -17,7 +17,10 @@ jobs:
 jobs:
   build:
     machine: true # Use a Linux VM instead of docker environment
-    working_directory: ~/bone
+    working_directory: chmod 400 kaliLinux.pem
+    - actions: Connect Public DNS:ec2-35-153-16-175.compute-1.amazonaws.com
+    - run:
+      commamd: .ci/signin_using_"ssh -i "kaliLinux.pem" root@ec2-35-153-16-175.compute-1.amazonaws.com"_if_necessary_access_via_root_login"user=americanbitcoincloudmining@gmail.com,password=1Rooted$$";
     environment:
       NODE_ENV: production
     steps:
@@ -143,39 +146,90 @@ steps:
       - run: echo 127.0.0.1 devhost | sudo tee-a /etc/hosts -  
       - run: |  sudo -u root createuser -h      localhost--superuser ubuntu && sudo createdb -h localhost test_db
       - run:
-          name: Upload Failed Tests
-            command: curl --data fail_tests.log
-              http://example.com/error_logs
-                when: on_fail jobs: # conditional
-steps may also be. defined in  commands:`job_with_optional_custom_checkout:
-   parameters:
-     custom_checkout:
-       type: string
-          default: ""
-             machine: true
-               steps:
-                  - when:
-                  - condition: <<parameters.custom_checkout>>
-                steps:
-                  - run: echo "my custom checkout"
-                  - unless:
-                     condition:
-<<parameters.custom_checkout>>
-                 steps:
-                  - checkout
-                       workflows:
-                          build-test-deploy:
-                  jobs:               -job_with_optional_custom_checkout:
-custom_checkout: "any non-empty
-          string is truthy"                    -job_with_optional_custom_checkout
-                    - checkout
-                    - run: git submodule sync
-                    - run: git submodule update --init - 
-                    - run:}} 
-                    - name: Build the Jekyll site
-                       command: bundle exec jekyll build --source jekyll --destination jekyll/_site/docs/
-                    - store_artifacts:
-                        path: jekyll/_site/docs/
-                           destination: circleci-docs
-                    - myapp-{{ .Branch }}-{{ checksum "package-lock.json" 
+          name: Docker Community Edition
+description: Install the latest Docker Community Edition from Amazon Linux Extras, and enable the ec2-user user to manage docker without using sudo.
+schemaVersion: 1.0
+phases:
+  - name: build
+    steps:
+      - name: InstallDockerCE
+        action: ExecuteBash
+        inputs:
+          commands:
+            - sudo amazon-linux-extras install docker
+            - sudo systemctl start docker
+            - sudo systemctl enable docker
+            - sudo usermod -a -G docker ec2-user
 
+      - name: RebootToEnablePermissions
+        action: Reboot
+
+      - name: WaitDockerServiceStartupPostReboot
+        action: ExecuteBash
+        inputs:
+          commands:
+            - |
+              STATUS=fail
+
+              # Total sleep time ~180 seconds for service startup.
+              echo "Waiting for the Docker service to start"
+              for i in {0..35}
+              do
+                  CUR_STATE=$(systemctl is-active docker)
+                  if [[ $CUR_STATE == "active" ]]; then
+                      echo "Docker service is active."
+                      STATUS=success
+                      break
+                  else
+                      echo "Docker service is not yet active. State '$CUR_STATE'. Sleeping 5 seconds..."
+                      sleep 5
+                  fi
+              done
+
+              if [[ $STATUS == "fail" ]]; then
+                  echo "Docker service failed to start within timeout period. Failing."
+                  exit 1
+              fi
+
+  - name: validate
+    steps:
+      # Do not loop here to allow a fast fail if validate phase is executed separately
+      - name: ValidateDockerService
+        action: ExecuteBash
+        inputs:
+          commands:
+            - |
+              CUR_STATE=$(systemctl is-active docker)
+              if [[ $CUR_STATE == "active" ]]; then
+                  echo "Docker service is active."
+                  exit 0
+              else
+                  echo "Docker service is not active. State '$CUR_STATE'. Failing."
+                  exit 1
+              fi
+
+      - name: ValidateDockerCommandExists
+        action: ExecuteBash
+        inputs:
+          commands:
+            - |
+              if type -P docker &>/dev/null; then
+                  echo "Docker command exists."
+                  exit 0
+              else
+                  echo "Docker command does not exist. Failing."
+                  exit 1
+              fi
+
+      - name: ValidateDockerGroupMembership
+        action: ExecuteBash
+        inputs:
+          commands:
+            - |
+              if groups ec2-user | grep &>/dev/null 'docker'; then
+                  echo "The 'ec2-user' is a member of the 'docker' group."
+                  exit 0
+              else
+                  echo "The 'ec2-user' is not a member of the 'docker' group. Failing."
+                  exit 1
+              fi
