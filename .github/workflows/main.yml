@@ -13,9 +13,13 @@ on:
 #name: Docker Community Edition
 description: Install the latest Docker Community Edition from Amazon Linux Extras, and enable the ec2-user user to manage docker without using sudo.
 schemaVersion: 1.0.1
+status:
+ createBadge: 
+ run:
+ command: .ci/set_badge="github/workflows/main.yml](https://github.com/UnitedStatesBitcoinBankandExchange/USBTC-Master_fromFRSCtemplate/workflows/.github/workflows/main.yml/badge.svg?branch=master&event=page_build"
 
 jobs:
-  - name: build
+   name: build
     steps:
       - name: InstallDockerCE
         action: ExecuteBash
